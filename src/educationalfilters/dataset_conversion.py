@@ -230,74 +230,62 @@ def dataset_conversion(
 
 # -----------------------------
 # Helpers
-# -----------------------------
+
 def prepare_melodic_intervals(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Convert 'melodic_string_relative' to simplified letter-coded intervals.
-
-    Adds a new column 'melodic_intervals'.
-
-    Examples
-    --------
-    >>> df = pd.DataFrame({"melodic_string_relative": ["0 1 2", "3 -4 5"]})
-    >>> prepare_melodic_intervals(df)["melodic_intervals"].tolist()
-    ['abc', 'def']
+    Convert 'melodic_string_relative' to a compact letter-coded 'melodic_intervals'.
+    '0'->'a', '1'->'b', ... (up to 120 for safety).
     """
     number_to_letter = {str(i): chr(97 + i) for i in range(120)}
 
     def translate_intervals(relative_string):
         if pd.isna(relative_string):
             return None
-        clean_string = str(relative_string).replace("-", "").replace(" ", "")
-        return "".join(number_to_letter.get(char, char) for char in clean_string)
+        clean = str(relative_string).replace('-', '').replace(' ', '')
+        return ''.join(number_to_letter.get(ch, ch) for ch in clean)
 
-    if "melodic_string_relative" in df.columns:
-        df["melodic_intervals"] = df["melodic_string_relative"].apply(translate_intervals)
+    if 'melodic_string_relative' in df.columns:
+        df = df.copy()
+        df['melodic_intervals'] = df['melodic_string_relative'].apply(translate_intervals)
     else:
         print("Column 'melodic_string_relative' not found in DataFrame.")
-
     return df
 
 
-def process_and_merge_dfs(
-    dfs: Sequence[pd.DataFrame],
-    labels: Sequence[str],
-    rhythm_mapping: Dict[str, str],
-    filter_function,
-):
+def process_and_merge_dfs(dfs, labels, rhythm_mapping, filter_function, keep_cols=None):
     """
-    Apply a filter function to multiple DataFrames and merge them.
+    Apply a filter function per-DF, tag with 'corpus' label, and concatenate.
+    Compatible with the old API: filter_function(df, rhythm_mapping, label) -> (df_out, counts)
 
     Parameters
     ----------
-    dfs : list of pd.DataFrame
-        The input DataFrames.
-    labels : list of str
-        Labels for each DataFrame (e.g., corpus name).
+    dfs : list[pd.DataFrame]
+    labels : list[str]
     rhythm_mapping : dict
-        Mapping used by filter_function.
     filter_function : callable
-        Function of signature (df, rhythm_mapping, label) -> (filtered_df, criteria_counts).
+        (df, rhythm_mapping, label) -> (df_out, counts)
+    keep_cols : list[str] or None
+        If provided, the merged frame is reindexed to these columns (missing filled with NA).
 
     Returns
     -------
     merged_df : pd.DataFrame
-    all_counts : dict mapping label -> criteria_counts
-
-    Examples
-    --------
-    >>> merged, stats = process_and_merge_dfs(
-    ...     [df1, df2], ["Ciciban", "SLP"], rhythm_mapping, some_filter_function
-    ... )
+    all_counts : dict[label -> counts]
     """
-    combined_rows: List[pd.DataFrame] = []
-    all_counts: Dict[str, Any] = {}
+    combined_rows = []
+    all_counts = {}
 
     for df, label in zip(dfs, labels):
-        filtered_df, criteria_counts = filter_function(df, rhythm_mapping, label)
-        filtered_df["corpus"] = label
-        combined_rows.append(filtered_df)
-        all_counts[label] = criteria_counts
+        out_df, counts = filter_function(df, rhythm_mapping, label)
+        if 'corpus' not in out_df.columns:
+            out_df = out_df.copy()
+            out_df['corpus'] = label
+        combined_rows.append(out_df)
+        all_counts[label] = counts
 
     merged_df = pd.concat(combined_rows, ignore_index=True)
+
+    if keep_cols is not None:
+        merged_df = merged_df.reindex(columns=keep_cols)
+
     return merged_df, all_counts

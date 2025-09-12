@@ -38,30 +38,14 @@ def standardise_filter_labels(
     """
     Add normalised labels alongside the original filter columns.
 
-    Parameters
-    ----------
-    df : DataFrame
-        Source dataframe (should already include the original *_check columns).
-    range_col : str
-        Column name for range filter ('range_check').
-    interval_col : str
-        Column name for interval jumps filter ('interval_jumps_check').
-    rhythm_col : str
-        Column name for rhythm filter ('rhythm_check').
-    in_place : bool
-        If True, mutate df; else return a copy.
-
-    Returns
-    -------
-    DataFrame
-        With added columns:
-          - VRF_label (VRF1/VRF2/X)
-          - IF_label  (IF1/IF2/X)
-          - RF_label  (RF1..RF4/X, guarded)
-          - VRF_exact (alias of VRF_label)
-          - IF_exact  (alias of IF_label)
-          - VRF2_cum (bool): VRF1 or VRF2
-          - IF2_cum  (bool): IF1 or IF2
+    Produces (non-destructively):
+      - VRF_label (VRF1/VRF2/X)
+      - IF_label  (IF1/IF2/X)
+      - RF_label  (RF1..RF4/X, guarded)
+      - VRF_exact (alias of VRF_label)
+      - IF_exact  (alias of IF_label)
+      - VRF2_cum (bool): VRF1 or VRF2
+      - IF2_cum  (bool): IF1 or IF2
     """
     target = df if in_place else df.copy()
 
@@ -76,17 +60,56 @@ def standardise_filter_labels(
         target["IF2_cum"] = target["IF_label"].isin(["IF1", "IF2"])
 
     if rhythm_col in target.columns:
-        # Guard against unexpected values (e.g., typos like 'RF5')
         vals = target[rhythm_col]
-        # Mark anything not in RF_ALLOWED as 'X'
         safe_vals = vals.where(vals.isin(RF_ALLOWED), other="X")
         target["RF_label"] = safe_vals.fillna("X")
 
-    # Drop intermediate debug columns if present
-    for col in ["interval_jumps_check", "rhythm_check"]:
-        if col in df_out.columns:
-            df_out = df_out.drop(columns=col)
+    # NOTE: no dropping here; dropping is handled in finalize_labels().
     return target
+
+def finalize_labels(
+    df: pd.DataFrame,
+    drop_debug: bool = True,
+    drop_diagnostics: bool = False,
+    range_col: str = 'range_check',
+    interval_col: str = 'interval_jumps_check',
+    rhythm_col: str = 'rhythm_check',
+) -> pd.DataFrame:
+    """
+    Standardise VRF/IF/RF labels, add cumulative *_BOTH flags,
+    and (optionally) drop intermediate debug columns.
+
+    Ensures columns:
+      - VRF_label, IF_label, RF_label
+      - VRF_BOTH, IF_BOTH, RF_BOTH
+    Optionally drops:
+      - interval_jumps_check, rhythm_check (drop_debug=True)
+      - IF1_reason, IF2_reason (drop_diagnostics=True)
+    """
+    out = standardise_filter_labels(
+        df,
+        range_col=range_col,
+        interval_col=interval_col,
+        rhythm_col=rhythm_col,
+        in_place=False,
+    )
+
+    # cumulative flags
+    out["VRF_BOTH"] = out.get("VRF_label", pd.Series(index=out.index)).isin(["VRF1", "VRF2"])
+    out["IF_BOTH"]  = out.get("IF_label",  pd.Series(index=out.index)).isin(["IF1", "IF2"])
+    out["RF_BOTH"]  = out.get("RF_label",  pd.Series(index=out.index)).isin(["RF1", "RF2", "RF3", "RF4"])
+
+    if drop_debug:
+        for col in (interval_col, rhythm_col):
+            if col in out.columns:
+                out = out.drop(columns=col)
+
+    if drop_diagnostics:
+        for col in ("IF1_reason", "IF2_reason"):
+            if col in out.columns:
+                out = out.drop(columns=col)
+
+    return out
 
 
 def validate_filters(
@@ -132,58 +155,3 @@ def validate_filters(
             report[name] = {"error": f'Column "{col}" not found in DataFrame.'}
 
     return report
-
-def finalize_labels(
-    df: pd.DataFrame,
-    drop_debug: bool = True,
-    drop_diagnostics: bool = False,
-    range_col: str = 'range_check',
-    interval_col: str = 'interval_jumps_check',
-    rhythm_col: str = 'rhythm_check',
-) -> pd.DataFrame:
-    """
-    Standardise VRF/IF/RF labels, add cumulative *_BOTH flags,
-    and (optionally) drop intermediate debug columns.
-
-    Ensures columns:
-      - VRF_label, IF_label, RF_label
-      - VRF_BOTH, IF_BOTH, RF_BOTH
-    Optionally drops:
-      - interval_jumps_check, rhythm_check (drop_debug=True)
-      - IF1_reason, IF2_reason (drop_diagnostics=True)
-    """
-    out = standardise_filter_labels(
-        df,
-        range_col=range_col,
-        interval_col=interval_col,
-        rhythm_col=rhythm_col,
-        in_place=False,
-    )
-
-    # cumulative flags
-    if 'VRF_label' in out.columns:
-        out['VRF_BOTH'] = out['VRF_label'].isin(['VRF1', 'VRF2'])
-    else:
-        out['VRF_BOTH'] = False
-
-    if 'IF_label' in out.columns:
-        out['IF_BOTH'] = out['IF_label'].isin(['IF1', 'IF2'])
-    else:
-        out['IF_BOTH'] = False
-
-    if 'RF_label' in out.columns:
-        out['RF_BOTH'] = out['RF_label'].isin(['RF1', 'RF2', 'RF3', 'RF4'])
-    else:
-        out['RF_BOTH'] = False
-
-    if drop_debug:
-        for col in (interval_col, rhythm_col):
-            if col in out.columns:
-                out = out.drop(columns=col)
-
-    if drop_diagnostics:
-        for col in ('IF1_reason', 'IF2_reason'):
-            if col in out.columns:
-                out = out.drop(columns=col)
-
-    return out

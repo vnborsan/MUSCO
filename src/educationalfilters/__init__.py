@@ -20,8 +20,7 @@ __all__ = [
     "vrf",
     "ifilters",
     "rfilters",
-    "summarize",
-]
+    "summarize"]
 
 __version__ = "0.1.0"
 
