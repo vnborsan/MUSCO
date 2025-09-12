@@ -56,3 +56,11 @@ def compute_rhythm_labels(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
             counts["X"] += 1
 
     return new_df, counts
+
+# Backward compatibility: older code may still call filter_songs(...)
+def filter_songs(df: pd.DataFrame, rhythm_mapping: dict, label: str):
+    """
+    Alias to compute_rhythm_labels(). rhythm_mapping and label are ignored
+    by the current implementation; kept only to preserve the old signature.
+    """
+    return compute_rhythm_labels(df)

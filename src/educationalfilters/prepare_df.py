@@ -1,14 +1,95 @@
-# --- Helpers restored from notebook-era logic --------------------------------
-import os, json
-import pandas as pd
+import os
+import json
+import re
+import ast
 from fractions import Fraction
-from music21 import pitch as _m21_pitch, converter as _m21_converter, note as _m21_note
-from typing import List, Dict, Optional, Tuple, Union
-from . import save_load  # centralised paths for pickles
 from pathlib import Path
-from pandas.errors import ParserError
-import ast, re
+from typing import List, Dict, Optional, Tuple, Union
 
+import pandas as pd
+from pandas.errors import ParserError
+
+import music21
+from music21 import pitch as _m21_pitch, converter as _m21_converter, note as _m21_note
+
+from . import save_load  # centralised paths for pickles
+
+# ---------------------------------------------
+
+# --- Canonical rhythm mapping (shared across corpora) ------------------------
+_BASE_MAP = {0.5: "a", 1.0: "d", 2.0: "e"}          # your original base
+_EXTRA_LETTERS = [chr(c) for c in range(ord("f"), ord("z")+1)]  # f..z
+
+def _norm_dur(x, ndigits: int = 3):
+    """Normalize to avoid float drift (e.g., 0.4999999 → 0.5)."""
+    try:
+        return round(float(x), ndigits)
+    except Exception:
+        return None
+
+from typing import Iterable
+
+def _collect_durations_from_column(col: Iterable) -> set[float]:
+    """Collect unique float durations from a column that may contain lists."""
+    out = set()
+    for seq in col:
+        if isinstance(seq, list):
+            for v in seq:
+                try:
+                    out.add(float(v))
+                except Exception:
+                    continue
+    return out
+
+def get_or_extend_canonical_map(observed_durations, map_path: str | Path) -> dict[float, str]:
+    """
+    Load the canonical rhythm map from pickle; extend it with any unseen durations.
+    Saves back only if extended. Returns the mapping dict.
+    """
+    mapping = save_load.load_pickle(map_path)  # existing map (dict[float->str])
+    # Letters pool for new durations
+    used_letters = set(mapping.values())
+    next_letters = [chr(c) for c in range(ord("f"), ord("z") + 1)]
+    # Make sure we don't reuse letters
+    next_letters = [ch for ch in next_letters if ch not in used_letters]
+
+    changed = False
+    for d in sorted({float(x) for x in observed_durations}):
+        if d not in mapping:
+            mapping[d] = next_letters.pop(0) if next_letters else f"x{len(mapping)}"
+            changed = True
+
+    if changed:
+        # ✅ Correct argument order (or use keywords)
+        save_load.save_pickle(mapping, map_path)
+        # or: save_load.save_pickle(descriptor_dict=mapping, descriptor_filename=map_path)
+    return mapping
+
+def convert_to_abc(seq: list[float], mapping: dict[float, str]) -> str:
+    """Map a list of durations to a compact ABC-letter string."""
+    if not isinstance(seq, list):
+        return ""
+    return "".join(mapping.get(float(x), "?") for x in seq)
+
+def durations_from_score(path: Path):
+    """
+    Parse a MusicXML score with music21 and return:
+      - a list of quarterLength floats for all notes/rests
+      - a list of unique time signature strings
+    """
+    try:
+        s = _m21_converter.parse(str(path))
+        durations = []
+        for e in s.recurse().notesAndRests:
+            ql = getattr(e, "quarterLength", None)
+            if ql is not None:
+                durations.append(float(ql))
+        # collect time signatures
+        ts = {ts.ratioString for ts in s.recurse().getElementsByClass("TimeSignature")}
+        return durations, list(ts)
+    except Exception:
+        return [], []
+    
 def convert_fraction_to_numeric_duration(rhythm_string: Union[str, List[str]]) -> List[float]:
     """
     Convert tokens like '1/2 1 2 3/4' (or list of tokens) to floats [0.5, 1.0, 2.0, 0.75].
@@ -51,22 +132,34 @@ def convert_midi_to_notes(midi_string_abs: str) -> List[str]:
             continue
     return out
 
-def get_interval_name(semitones: Union[int, float, str, None]) -> Optional[str]:
+def interval_label(semitones):
     """
-    Bucketize ambitus in semitones into labels you used in analysis.
-    Adjust if you had a more detailed scheme.
+    Map an integer semitone span to interval names up to OCTAVE.
+    >12 collapses to 'ABOVE OCTAVE'.
     """
     try:
-        s = int(float(semitones))
+        s = int(round(float(semitones)))
     except Exception:
         return None
-    if s <= 8:
-        return "WITHIN EIGHTH"
-    if s <= 9:
-        return "NINTH"
-    if s <= 12:
-        return "WITHIN OCTAVE"
-    return "ABOVE EIGHTH"
+
+    names = {
+         0: "UNISON",
+         1: "SECOND",
+         2: "SECOND",
+         3: "THIRD",
+         4: "THIRD",
+         5: "PERFECT FOURTH",
+         6: "TRITONE",
+         7: "PERFECT FIFTH",
+         8: "SIXTH",
+         9: "SIXTH",
+        10: "SEVENTH",
+        11: "SEVENTH",
+        12: "OCTAVE",
+    }
+    if s in names:
+        return names[s]
+    return "ABOVE OCTAVE"
 
 # Default rhythm mapping you used in RF & indexing
 _DEFAULT_RHYTHM_MAP: Dict[float, str] = {0.5: "a", 1.0: "d", 2.0: "e"}
@@ -86,7 +179,9 @@ def _ensure_single_time_signature(ts) -> Optional[str]:
 def convert_jsons_to_df(folder_path: str) -> pd.DataFrame:
     """
     Build a Ciciban DataFrame from per-song JSON files.
-    Keeps rhythm as numeric in 'rhythm_string'; letters added later in df_upgrade().
+    Enforces NO-PAUSES-IN-SEQUENCE:
+      - rhythm_string = notes-only (truncate to melody length)
+      - pause_count = (full rhythm events) - (melody tokens), never < 0
     """
     all_rows = []
     for filename in os.listdir(folder_path):
@@ -96,12 +191,16 @@ def convert_jsons_to_df(folder_path: str) -> pd.DataFrame:
         with open(fp, "r", encoding="utf-8") as f:
             data = json.load(f)
 
+        # --- melody & rhythm (raw) ---
         melodic_abs = data["contour"]["melodic_contour_string_absolute"]
-        rhythm_numeric = convert_fraction_to_numeric_duration(data["rhythm"]["rhythm_string"])
+        rhythm_numeric_full = convert_fraction_to_numeric_duration(
+            data["rhythm"]["rhythm_string"]
+        )
 
-        rhythm_len = len(rhythm_numeric)
+        # --- enforce notes-only rhythm; pauses recorded separately ---
         melody_len = len(str(melodic_abs).split())
-        pause_count = max(0, rhythm_len - melody_len)
+        pause_count = max(0, len(rhythm_numeric_full) - melody_len)
+        rhythm_numeric_notes_only = rhythm_numeric_full[:melody_len]
         has_pauses = bool(pause_count > 0)
 
         stem = os.path.splitext(filename)[0]
@@ -119,7 +218,7 @@ def convert_jsons_to_df(folder_path: str) -> pd.DataFrame:
             "ambitus_min": midi_to_note_name(data.get("ambitus", {}).get("min_note")),
             "ambitus_max": midi_to_note_name(data.get("ambitus", {}).get("max_note")),
             "ambitus_semitones": data.get("ambitus", {}).get("ambitus_semitones"),
-            "ambitus_interval":  get_interval_name(data.get("ambitus", {}).get("ambitus_semitones")),
+            "ambitus_interval":  interval_label(data.get("ambitus", {}).get("ambitus_semitones")),
 
             "number_of_measures": data.get("duration", {}).get("measures"),
 
@@ -128,7 +227,8 @@ def convert_jsons_to_df(folder_path: str) -> pd.DataFrame:
             "melodic_string_abc":       " ".join(convert_midi_to_notes(melodic_abs)),
             "melodic_string_relative":  data["contour"]["melodic_contour_string_relative"],
 
-            "rhythm_string": rhythm_numeric,  # numeric durations here
+            # notes-only; pauses counted separately
+            "rhythm_string": rhythm_numeric_notes_only,
 
             "rhythmic_measures": data["rhythm"]["measure_starts"],
             "melodic_measures":  data["contour"]["measure_starts"],
@@ -138,108 +238,94 @@ def convert_jsons_to_df(folder_path: str) -> pd.DataFrame:
         }
         all_rows.append(row)
 
-    df = pd.DataFrame(all_rows)
-    return df
+    return pd.DataFrame(all_rows)
 
 # --- 2) Upgrade Ciciban DF: add letters + save mapping ----------------------
-def df_upgrade(df: pd.DataFrame, save_file_path: str = "rhythm_mapping.pickle"
-               ) -> Tuple[pd.DataFrame, Dict[float, str]]:
+def df_upgrade(df: pd.DataFrame, save_file_path: str = "rhythm_mapping.pickle"):
     """
-    Convert df['rhythm_string'] (list of floats) to letters in df['rhythm_string_abc'],
-    save mapping to data/processed/<save_file_path>, and return (df, mapping).
+    Convert df['rhythm_string'] (notes-only, list[float]) to ABC using a single
+    canonical mapping shared across corpora. Extends the mapping deterministically
+    if new durations appear, then saves it to data/processed/<save_file_path>.
+    Returns (df, mapping).
     """
-    # Build mapping from durations present (fallback to defaults if unseen)
-    durations = set()
-    for seq in df.get("rhythm_string", []):
-        if isinstance(seq, list):
-            durations.update(seq)
-    durations = {float(x) for x in durations if x is not None}
-
-    # Reuse default letters for common values; extend with extra letters if needed
-    mapping = dict(_DEFAULT_RHYTHM_MAP)  # start with defaults
-    extra_letters = [chr(c) for c in range(ord("f"), ord("z")+1)]
-    i = 0
-    for d in sorted(durations):
-        if d not in mapping:
-            mapping[d] = extra_letters[i] if i < len(extra_letters) else f"x{len(mapping)}"
-            i += 1
-
-    # Apply mapping to create rhythm_string_abc
-    def _to_letters(seq):
-        if not isinstance(seq, list):
-            return ""
-        return "".join(mapping.get(float(x), "?") for x in seq)
-
     df = df.copy()
-    df["rhythm_string_abc"] = df["rhythm_string"].apply(_to_letters)
-
-    save_load.save_pickle(descriptor_dict=mapping, descriptor_filename=save_file_path)
-   
+    observed = _collect_durations_from_column(df.get("rhythm_string", []))
+    mapping = get_or_extend_canonical_map(observed, save_file_path)
+    df["rhythm_string_abc"] = df["rhythm_string"].apply(lambda s: convert_to_abc(s, mapping))
     return df, mapping
 
+# --- 2) Upgrade SLP DF: add rhythm and convert it to letters + save mapping ----------------------
 
-# ------- HELPER -----------
-def _coerce_rhythm_sequence(x):
+def convert_rhythm_to_ABC(query, rhythm_mapping):
     """
-    Ensure rhythm_string is a list[float].
-    Accepts:
-      - list[float] already
-      - stringified list: "[0.5, 1, 2]"
-      - whitespace/comma-separated text: "0.5 1 2" or "0.5,1,2"
+    Converts rhythm to ABC notation.
+    If the query is already a string (like 'accb'), return it as is.
+    If it's a list of durations (like [0.5, 1.0]), map using the rhythm_mapping.
     """
-    if isinstance(x, list):
-        return [float(v) for v in x if v is not None]
-    if pd.isna(x):
-        return []
-    s = str(x).strip()
-    if not s:
-        return []
-    # try Python literal (e.g., "[0.5, 1, 2]")
-    try:
-        val = ast.literal_eval(s)
-        if isinstance(val, list):
-            return [float(v) for v in val]
-    except Exception:
-        pass
-    # fallback: split by whitespace/commas
-    toks = re.split(r"[,\s]+", s)
-    out = []
-    for t in toks:
-        if not t:
-            continue
+    if isinstance(query, str):
+        return query  # Already in ABC form
+
+    if isinstance(query, list):
         try:
-            out.append(float(t))
-        except Exception:
-            continue
-    return out
+            # ensure float keys
+            rm = {float(k): v for k, v in rhythm_mapping.items()}
+            return ''.join(rm.get(float(num), '?') for num in query)
+        except Exception as e:
+            print("Error during rhythm conversion:", e)
+            return "?" * len(query)  # fallback
 
-def _melody_token_count_row(row: pd.Series) -> int:
-    """Count melodic tokens; prefer absolute MIDI if present."""
-    for col in ("melodic_string_absolute", "melodic_string", "melodic_string_abc"):
-        if col in row and pd.notna(row[col]):
-            return len(str(row[col]).split())
-    return 0
+    raise ValueError("Unrecognized input format for rhythm query: must be str or list of floats.")
+
+
+def extract_rhythm_and_time_from_mxl(mxl_file):
+    """
+    Extract note durations (no rests) + all time signatures + pause count from a MusicXML (.mxl).
+    Returns: (rhythm_sequence, time_signatures, pause_count)
+    """
+    try:
+        score = _m21_converter.parse(mxl_file)
+        rhythm_sequence = []
+        time_signatures = set()
+        pause_count = 0
+
+        for part in score.parts:
+            for element in part.flat:
+                if isinstance(element, music21.meter.TimeSignature):
+                    time_signatures.add(str(element.ratioString))
+                elif isinstance(element, music21.note.Note):
+                    rhythm_sequence.append(element.quarterLength)  # notes only
+                elif isinstance(element, music21.note.Rest):
+                    pause_count += 1  # rests counted separately
+
+        return rhythm_sequence, list(time_signatures), pause_count
+
+    except Exception as e:
+        print(f"⚠️ Error parsing {mxl_file}: {e}")
+        return [], [], 0
+
+
+# --- main SLP prep (replace your current prepare_slp with this) --------------
 
 def prepare_slp(filepath, mxl_folder, rhythm_mapping_path):
     """
     Loads and prepares the SLP dataset, adding:
     - **Melodic data (from CSV)**
-    - **Rhythmic data (from rhythm_string IF present, else from MusicXML)**
-    - **Time signatures normalized**
-    - **Pauses detection and count**
+    - **Rhythmic data (from MusicXML)**
+    - **Time signatures (all found in score)**
+    - **Pauses detection and count (vs melodic_string_nice tokens)**
     - **Rhythms converted to ABC notation**
     """
-    # ✅ Load SLP metadata (keep your delimiter=';' as in your original)
+    # ✅ Load SLP metadata (your original delimiter)
     file_path = os.path.join(os.getcwd(), filepath)
     slp_df = pd.read_csv(file_path, delimiter=';')
 
-    # --- Your existing tweak for quoted multi-TS rows ---
+    # ✅ Your tweak for quoted multi-TS rows
     if 'time_signature' in slp_df.columns:
         slp_df['time_signature'] = slp_df['time_signature'].apply(
             lambda x: f'"{x}"' if isinstance(x, str) and ',' in x else x
         )
 
-    # ✅ Rename columns for consistency (as in your file)
+    # ✅ Rename columns for consistency
     slp_df.rename(
         columns={
             'min_pitch': 'ambitus_min',
@@ -249,7 +335,22 @@ def prepare_slp(filepath, mxl_folder, rhythm_mapping_path):
         inplace=True
     )
     if 'ambitus_semitones' in slp_df.columns:
-        slp_df['ambitus_interval'] = slp_df['ambitus_semitones'].apply(get_interval_name)
+        slp_df['ambitus_interval'] = slp_df['ambitus_semitones'].apply(interval_label)
+
+        # Ensure a unique, simple index
+    slp_df = slp_df.reset_index(drop=True)
+
+    # Pre-create target columns (avoid shared list objects!)
+    if 'rhythm_string' not in slp_df.columns:
+        slp_df['rhythm_string'] = pd.Series([[] for _ in range(len(slp_df))], dtype=object)
+    if 'rhythm_string_abc' not in slp_df.columns:
+        slp_df['rhythm_string_abc'] = ""
+    if 'rhythm_length' not in slp_df.columns:
+        slp_df['rhythm_length'] = 0
+    if 'pause_count' not in slp_df.columns:
+        slp_df['pause_count'] = 0
+    if 'has_pauses' not in slp_df.columns:
+        slp_df['has_pauses'] = "NO"
 
     # ✅ Ensure required columns exist
     if 'melodic_string_abc' not in slp_df.columns:
@@ -261,116 +362,49 @@ def prepare_slp(filepath, mxl_folder, rhythm_mapping_path):
     if 'metadata_filename' not in slp_df.columns:
         slp_df['metadata_filename'] = slp_df.get('metadata_title', slp_df.index.astype(str))
 
-    # ✅ Load rhythm mapping for ABC conversion (your original approach)
-    rhythm_mapping = pickle.load(open(rhythm_mapping_path, 'rb'))
+    # ✅ Load rhythm mapping (via project helper for correct paths)
+    rhythm_mapping = save_load.load_pickle(rhythm_mapping_path)
 
-    # ---------- NEW: FAST-PATH USING CSV rhythm_string (no MXL needed) ----------
-    def _coerce_rhythm_sequence(x):
-        """
-        Ensure rhythm_string is list[float] even if stored as text like:
-        "[0.5, 1, 2]" or "0.5 1 2" or "0.5,1,2".
-        """
-        if isinstance(x, list):
-            return [float(v) for v in x if v is not None]
-        if pd.isna(x):
-            return []
-        s = str(x).strip()
-        if not s:
-            return []
-        # attempt Python literal list
-        if s.startswith('[') and s.endswith(']'):
-            try:
-                val = ast.literal_eval(s)
-                if isinstance(val, list):
-                    return [float(v) for v in val]
-            except Exception:
-                pass
-        # fallback: split by commas/whitespace
-        toks = re.split(r"[,\s]+", s)
-        out = []
-        for t in toks:
-            if not t:
-                continue
-            try:
-                out.append(float(t))
-            except Exception:
-                continue
-        return out
+    # ✅ Prepare MXL file-matching dictionary
+    mxl_files = {
+        f.replace('.mxl', '').replace('--', '.').replace('-', '.'): os.path.join(mxl_folder, f)
+        for f in os.listdir(mxl_folder) if f.endswith('.mxl')
+    }
 
-    # If CSV has rhythm_string, coerce and use it
-    csv_rhythm_present = 'rhythm_string' in slp_df.columns
-    if csv_rhythm_present:
-        slp_df['rhythm_string'] = slp_df['rhythm_string'].apply(_coerce_rhythm_sequence)
-    else:
-        slp_df['rhythm_string'] = [[] for _ in range(len(slp_df))]
+    for i, row in slp_df.iterrows():
+        meta_filename = str(row['metadata_filename']).replace(' ', '')
+        matched_mxl = mxl_files.get(meta_filename)
 
-    # Map durations -> letters using your saved mapping
-    def _to_letters(seq):
-        if not isinstance(seq, list):
-            return ""
-        return "".join(rhythm_mapping.get(float(x), "?") for x in seq)
+        if not matched_mxl:
+            print(f"❌ No match for {meta_filename}")
+            continue
 
-    slp_df['rhythm_string_abc'] = slp_df['rhythm_string'].apply(_to_letters)
+        print(f"✅ Updating: {meta_filename} → {matched_mxl}")
 
-    # Compute pause_count and has_pauses (same logic as Ciciban)
-    def _melody_token_count_row(row):
-        for col in ('melodic_string_absolute', 'melodic_string', 'melodic_string_abc'):
-            if col in row and pd.notna(row[col]):
-                return len(str(row[col]).split())
-        return 0
+        # Extract note durations (no rests), all TS, and real rest count
+        rhythm_sequence, time_signatures, pause_count = extract_rhythm_and_time_from_mxl(matched_mxl)
 
-    slp_df['pause_count'] = slp_df.apply(
-        lambda row: max(0, len(row['rhythm_string']) - _melody_token_count_row(row)),
-        axis=1
-    ).astype('Int64')
-    slp_df['has_pauses'] = slp_df['pause_count'].fillna(0).astype(int).gt(0)
+        if rhythm_sequence is not None and time_signatures is not None:
+            print(f"🎵 Extracted Rhythm ({meta_filename}): {rhythm_sequence}")
+            print(f"🕒 Extracted Time Signatures: {time_signatures}")
 
-    # Normalize time_signature to 'N/D'
-    if 'time_signature' in slp_df.columns:
-        slp_df['time_signature'] = slp_df['time_signature'].astype(str).str.extract(r'(\d+/\d+)', expand=False)
+            # Canonical mapping enforcement
+            obs_slp   = _collect_durations_from_column([rhythm_sequence])
+            canon_map = get_or_extend_canonical_map(obs_slp, rhythm_mapping_path)
+            rhythm_ABC = convert_to_abc(rhythm_sequence, canon_map)
 
-    # Fill ambitus_min/max if the table had min/max pitch names
-    if 'ambitus_min' in slp_df.columns and 'min_pitch' in slp_df.columns:
-        slp_df['ambitus_min'] = slp_df['ambitus_min'].fillna(slp_df['min_pitch'])
-    if 'ambitus_max' in slp_df.columns and 'max_pitch' in slp_df.columns:
-        slp_df['ambitus_max'] = slp_df['ambitus_max'].fillna(slp_df['max_pitch'])
+            print(f"🎼 Converted Rhythm ABC: {rhythm_ABC}")
 
-    # ---------- FALLBACK: MusicXML path (run only if rhythms still empty) ----------
-    # If ALL rows have empty rhythm (length==0) and MXL folder exists, run your original MXL extraction
-    try:
-        need_mxl = (slp_df['rhythm_string'].apply(len) == 0).all() and os.path.isdir(mxl_folder)
-    except Exception:
-        need_mxl = False
+            # Positional assignments (avoid .loc with possibly non-unique labels)
+            slp_df.at[i, 'time_signature']     = ', '.join(time_signatures) if time_signatures else row.get('time_signature')
+            slp_df.at[i, 'rhythm_string']      = rhythm_sequence
+            slp_df.at[i, 'rhythm_string_abc']  = rhythm_ABC
+            slp_df.at[i, 'rhythm_length']      = len(rhythm_sequence)
+            slp_df.at[i, 'pause_count']        = int(pause_count)
+            slp_df.at[i, 'has_pauses']         = "YES" if pause_count > 0 else "NO"
+        else:
+            print(f"⚠️ Warning: No rhythm data found for {meta_filename}")
+    # else:
+    #     print(f"❌ No match for {meta_filename}")
 
-    if need_mxl:
-        # (keep your original MXL logic here exactly as you had it)
-        mxl_files = {
-            f.replace('.mxl', '').replace('--', '.').replace('-', '.'): os.path.join(mxl_folder, f)
-            for f in os.listdir(mxl_folder) if f.endswith('.mxl')
-        }
-
-        for idx, row in slp_df.iterrows():
-            meta_filename = str(row['metadata_filename']).replace(' ', '')
-            matched_mxl = mxl_files.get(meta_filename)
-
-            if matched_mxl:
-                # Your original helper: extract_rhythm_and_time_from_mxl
-                rhythm_sequence, time_signatures = extract_rhythm_and_time_from_mxl(matched_mxl)
-
-                slp_df.at[idx, 'rhythm_string'] = rhythm_sequence or []
-                slp_df.at[idx, 'time_signature'] = ', '.join(time_signatures) if time_signatures else row.get('time_signature')
-
-                # ABC letters
-                rhythm_ABC = ''.join(rhythm_mapping.get(float(num), '?') for num in rhythm_sequence)
-                slp_df.at[idx, 'rhythm_string_abc'] = rhythm_ABC
-
-                # pauses
-                melody_length = _melody_token_count_row(row)
-                pause_count = max(len(rhythm_sequence) - melody_length, 0)
-                slp_df.at[idx, 'pause_count'] = pause_count
-                slp_df.at[idx, 'has_pauses'] = bool(pause_count > 0)
-            else:
-                print(f"❌ No match for {meta_filename} (no MXL file)")
-
-    slp_df['corpus'] = 'SLP'
     return slp_df

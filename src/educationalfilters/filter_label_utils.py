@@ -82,6 +82,10 @@ def standardise_filter_labels(
         safe_vals = vals.where(vals.isin(RF_ALLOWED), other="X")
         target["RF_label"] = safe_vals.fillna("X")
 
+    # Drop intermediate debug columns if present
+    for col in ["interval_jumps_check", "rhythm_check"]:
+        if col in df_out.columns:
+            df_out = df_out.drop(columns=col)
     return target
 
 
@@ -128,3 +132,58 @@ def validate_filters(
             report[name] = {"error": f'Column "{col}" not found in DataFrame.'}
 
     return report
+
+def finalize_labels(
+    df: pd.DataFrame,
+    drop_debug: bool = True,
+    drop_diagnostics: bool = False,
+    range_col: str = 'range_check',
+    interval_col: str = 'interval_jumps_check',
+    rhythm_col: str = 'rhythm_check',
+) -> pd.DataFrame:
+    """
+    Standardise VRF/IF/RF labels, add cumulative *_BOTH flags,
+    and (optionally) drop intermediate debug columns.
+
+    Ensures columns:
+      - VRF_label, IF_label, RF_label
+      - VRF_BOTH, IF_BOTH, RF_BOTH
+    Optionally drops:
+      - interval_jumps_check, rhythm_check (drop_debug=True)
+      - IF1_reason, IF2_reason (drop_diagnostics=True)
+    """
+    out = standardise_filter_labels(
+        df,
+        range_col=range_col,
+        interval_col=interval_col,
+        rhythm_col=rhythm_col,
+        in_place=False,
+    )
+
+    # cumulative flags
+    if 'VRF_label' in out.columns:
+        out['VRF_BOTH'] = out['VRF_label'].isin(['VRF1', 'VRF2'])
+    else:
+        out['VRF_BOTH'] = False
+
+    if 'IF_label' in out.columns:
+        out['IF_BOTH'] = out['IF_label'].isin(['IF1', 'IF2'])
+    else:
+        out['IF_BOTH'] = False
+
+    if 'RF_label' in out.columns:
+        out['RF_BOTH'] = out['RF_label'].isin(['RF1', 'RF2', 'RF3', 'RF4'])
+    else:
+        out['RF_BOTH'] = False
+
+    if drop_debug:
+        for col in (interval_col, rhythm_col):
+            if col in out.columns:
+                out = out.drop(columns=col)
+
+    if drop_diagnostics:
+        for col in ('IF1_reason', 'IF2_reason'):
+            if col in out.columns:
+                out = out.drop(columns=col)
+
+    return out
