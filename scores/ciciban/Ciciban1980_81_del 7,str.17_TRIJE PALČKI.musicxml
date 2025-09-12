@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <work>
+    <work-title>TRIJE PALČKI</work-title>
+    </work>
+  <identification>
+    <creator type="composer">J. Bitenc</creator>
+    <encoding>
+      <software>MuseScore 3.6.2</software>
+      <encoding-date>2023-04-25</encoding-date>
+      <supports element="accidental" type="yes"/>
+      <supports element="beam" type="yes"/>
+      <supports element="print" attribute="new-page" type="yes" value="yes"/>
+      <supports element="print" attribute="new-system" type="yes" value="yes"/>
+      <supports element="stem" type="yes"/>
+      </encoding>
+    </identification>
+  <defaults>
+    <scaling>
+      <millimeters>7</millimeters>
+      <tenths>40</tenths>
+      </scaling>
+    <page-layout>
+      <page-height>1697.14</page-height>
+      <page-width>1200</page-width>
+      <page-margins type="even">
+        <left-margin>85.7143</left-margin>
+        <right-margin>85.7143</right-margin>
+        <top-margin>85.7143</top-margin>
+        <bottom-margin>85.7143</bottom-margin>
+        </page-margins>
+      <page-margins type="odd">
+        <left-margin>85.7143</left-margin>
+        <right-margin>85.7143</right-margin>
+        <top-margin>85.7143</top-margin>
+        <bottom-margin>85.7143</bottom-margin>
+        </page-margins>
+      </page-layout>
+    <word-font font-family="Edwin" font-size="10"/>
+    <lyric-font font-family="Edwin" font-size="10"/>
+    </defaults>
+  <credit page="1">
+    <credit-type>title</credit-type>
+    <credit-words default-x="600" default-y="1611.43" justify="center" valign="top" font-size="22">TRIJE PALČKI</credit-words>
+    </credit>
+  <credit page="1">
+    <credit-type>subtitle</credit-type>
+    <credit-words default-x="600" default-y="1554.29" justify="center" valign="top" font-size="16">J. Bitenc</credit-words>
+    </credit>
+  <credit page="1">
+    <credit-type>composer</credit-type>
+    <credit-words default-x="1114.29" default-y="1511.43" justify="right" valign="bottom">J. Bitenc</credit-words>
+    </credit>
+  <part-list>
+    <part-group type="start" number="1">
+      <group-symbol>brace</group-symbol>
+      </part-group>
+    <score-part id="P1">
+      <part-name>Piano</part-name>
+      <part-abbreviation>Pno.</part-abbreviation>
+      <score-instrument id="P1-I1">
+        <instrument-name>Piano</instrument-name>
+        </score-instrument>
+      <midi-device id="P1-I1" port="1"></midi-device>
+      <midi-instrument id="P1-I1">
+        <midi-channel>1</midi-channel>
+        <midi-program>1</midi-program>
+        <volume>78.7402</volume>
+        <pan>0</pan>
+        </midi-instrument>
+      </score-part>
+    </part-list>
+  <part id="P1">
+    <measure number="1" width="326.80">
+      <print>
+        <system-layout>
+          <system-margins>
+            <left-margin>50.00</left-margin>
+            <right-margin>0.00</right-margin>
+            </system-margins>
+          <top-system-distance>170.00</top-system-distance>
+          </system-layout>
+        </print>
+      <attributes>
+        <divisions>2</divisions>
+        <key>
+          <fifths>-1</fifths>
+          </key>
+        <time>
+          <beats>2</beats>
+          <beat-type>4</beat-type>
+          </time>
+        <clef>
+          <sign>G</sign>
+          <line>2</line>
+          </clef>
+        </attributes>
+      <note default-x="102.34" default-y="-50.00">
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>Tri</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>Pa</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>To</text>
+          </lyric>
+        </note>
+      <note default-x="158.00" default-y="-50.00">
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>je</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>pred</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>da</text>
+          </lyric>
+        </note>
+      <note default-x="213.67" default-y="-45.00">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pal</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>hi</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>že</text>
+          </lyric>
+        </note>
+      <note default-x="269.33" default-y="-40.00">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="8.88" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>čki,</text>
+          </lyric>
+        <lyric number="2" default-x="9.53" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>ško,</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>za</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="2" width="244.98">
+      <note default-x="18.87" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>tri</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>so</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pr</text>
+          </lyric>
+        </note>
+      <note default-x="74.95" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>je</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>sed</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>vim</text>
+          </lyric>
+        </note>
+      <note default-x="131.03" default-y="-30.00">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>mal</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>mi</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>grič</text>
+          </lyric>
+        </note>
+      <note default-x="187.11" default-y="-25.00">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>čki</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>ško</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>kom</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="3" width="264.32">
+      <note default-x="49.19" default-y="-20.00">
+        <pitch>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>down</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>so</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>voz</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pal</text>
+          </lyric>
+        <lyric number="4" default-x="-12.23" default-y="-115.61" relative-x="-18.73" relative-y="13.39">
+          <syllabic>single</syllabic>
+          <text>z</text>
+          </lyric>
+        </note>
+      <note default-x="102.53" default-y="-20.00">
+        <pitch>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>down</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>do</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>kom</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>čki</text>
+          </lyric>
+        </note>
+      <note default-x="155.86" default-y="-25.00">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>ma</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>se</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>za</text>
+          </lyric>
+        </note>
+      <note default-x="209.19" default-y="-30.00">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>se</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pri</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>jo</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="4" width="142.47">
+      <note default-x="19.06" default-y="-25.00">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>de</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>pe</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>ka</text>
+          </lyric>
+        </note>
+      <note default-x="79.86" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="8.88" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li,</text>
+          </lyric>
+        <lyric number="2" default-x="9.16" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>lje,</text>
+          </lyric>
+        <lyric number="3" default-x="8.88" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li,</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="5" width="339.18">
+      <print new-system="yes">
+        <system-layout>
+          <system-margins>
+            <left-margin>0.00</left-margin>
+            <right-margin>0.00</right-margin>
+            </system-margins>
+          <system-distance>183.24</system-distance>
+          </system-layout>
+        </print>
+      <note default-x="76.71" default-y="-20.00">
+        <pitch>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>down</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>knji</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pal</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>dol</text>
+          </lyric>
+        </note>
+      <note default-x="141.88" default-y="-20.00">
+        <pitch>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>down</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>ge</text>
+          </lyric>
+        <lyric number="2" default-x="9.21" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>čke,</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>vo</text>
+          </lyric>
+        <lyric number="4" default-x="-7.66" default-y="-115.61" relative-x="-14.16" relative-y="-8.31">
+          <syllabic>single</syllabic>
+          <text>z</text>
+          </lyric>
+        </note>
+      <note default-x="207.05" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>bra</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>mal</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>zli</text>
+          </lyric>
+        </note>
+      <note default-x="272.21" default-y="-30.00">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="8.88" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li,</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>čke</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>čka</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="6" width="242.12">
+      <note default-x="24.10" default-y="-25.00">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pe</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>ven</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>so</text>
+          </lyric>
+        </note>
+      <note default-x="78.15" default-y="-25.00">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>smi</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>po</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>sko</text>
+          </lyric>
+        </note>
+      <note default-x="132.21" default-y="-40.00">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pe</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>kli</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>či</text>
+          </lyric>
+        </note>
+      <note default-x="186.27" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="8.88" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li,</text>
+          </lyric>
+        <lyric number="2" default-x="9.03" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>če,</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="7" width="258.15">
+      <note default-x="17.80" default-y="-30.00">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>do</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>v</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>in</text>
+          </lyric>
+        </note>
+      <note default-x="77.43" default-y="-30.00">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>bro</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>širni</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>do</text>
+          </lyric>
+        </note>
+      <note default-x="137.07" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>se</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>svet</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>mov</text>
+          </lyric>
+        </note>
+      <note default-x="196.71" default-y="-40.00">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>1</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>i</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>jih</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>single</syllabic>
+          <text>jo</text>
+          </lyric>
+        </note>
+      </measure>
+    <measure number="8" width="189.12">
+      <note default-x="29.24" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="6.50" default-y="-50.40" relative-y="-30.00">
+          <syllabic>middle</syllabic>
+          <text>me</text>
+          </lyric>
+        <lyric number="2" default-x="6.50" default-y="-72.14" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>pe</text>
+          </lyric>
+        <lyric number="3" default-x="6.50" default-y="-93.87" relative-y="-30.00">
+          <syllabic>begin</syllabic>
+          <text>ubra</text>
+          </lyric>
+        </note>
+      <note default-x="103.86" default-y="-35.00">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+        <lyric number="1" default-x="8.69" default-y="-50.40" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li.</text>
+          </lyric>
+        <lyric number="2" default-x="8.97" default-y="-72.14" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>lje.</text>
+          </lyric>
+        <lyric number="3" default-x="8.69" default-y="-93.87" relative-y="-30.00">
+          <syllabic>end</syllabic>
+          <text>li.</text>
+          </lyric>
+        </note>
+      <barline location="right">
+        <bar-style>light-heavy</bar-style>
+        </barline>
+      </measure>
+    </part>
+  </score-partwise>
