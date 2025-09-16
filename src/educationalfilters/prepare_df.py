@@ -49,7 +49,7 @@ def get_or_extend_canonical_map(observed_durations, map_path: str | Path) -> dic
     mapping = save_load.load_pickle(map_path)  # existing map (dict[float->str])
     # Letters pool for new durations
     used_letters = set(mapping.values())
-    next_letters = [chr(c) for c in range(ord("f"), ord("z") + 1)]
+    next_letters = [chr(c) for c in range(ord("h"), ord("z") + 1)]
     # Make sure we don't reuse letters
     next_letters = [ch for ch in next_letters if ch not in used_letters]
 
