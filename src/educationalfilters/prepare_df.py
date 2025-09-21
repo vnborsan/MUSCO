@@ -213,8 +213,8 @@ def convert_jsons_to_df(folder_path: str) -> pd.DataFrame:
             "metadata_title":   data.get("metadata", {}).get("title"),
 
             "key": data.get("key", {}).get("most_certain_key"),
-            "time_signature": _ensure_single_time_signature(data.get("time_signature")),
-
+            "time_signature": (lambda xs: ", ".join(dict.fromkeys(xs)) if xs else None)(
+            re.findall(r"\d+/\d+", str(data.get("time_signature") or ""))),
             "ambitus_min": midi_to_note_name(data.get("ambitus", {}).get("min_note")),
             "ambitus_max": midi_to_note_name(data.get("ambitus", {}).get("max_note")),
             "ambitus_semitones": data.get("ambitus", {}).get("ambitus_semitones"),
@@ -396,7 +396,8 @@ def prepare_slp(filepath, mxl_folder, rhythm_mapping_path):
             print(f"🎼 Converted Rhythm ABC: {rhythm_ABC}")
 
             # Positional assignments (avoid .loc with possibly non-unique labels)
-            slp_df.at[i, 'time_signature']     = ', '.join(time_signatures) if time_signatures else row.get('time_signature')
+            ts_list = time_signatures if time_signatures else re.findall(r'\d+/\d+', str(row.get('time_signature', '')))
+            slp_df.at[i, 'time_signature'] = ', '.join(dict.fromkeys(ts_list)) if ts_list else None
             slp_df.at[i, 'rhythm_string']      = rhythm_sequence
             slp_df.at[i, 'rhythm_string_abc']  = rhythm_ABC
             slp_df.at[i, 'rhythm_length']      = len(rhythm_sequence)
