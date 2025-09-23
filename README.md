@@ -16,8 +16,8 @@ MUSCO is an open-source digital music platform with multiple corpora and support
 - Filters are also available to use directly on the MUSCO platform  
 
 ## Corpora
-- *Ciciban*: 123 digitised children’s songs (JSONs, scores available here: **to be saved under scores, when using the code in designated folder.**)  
-- *SLP*: 402 Slovenian folk songs (CSV, scores available here: XXX **to be saved under scores, when using the code in designated folder.**)  
+- *Ciciban*: 123 digitised children’s songs (JSONs, scores available here: [here][https://entrepot.recherche.data.gouv.fr/dataset.xhtml?persistentId=doi:10.57745/SINZFK] **Scores to be saved in designated folder or code should be altered.**)  
+- *SLP*: 402 Slovenian folk songs (CSV, scores available [here][https://entrepot.recherche.data.gouv.fr/dataset.xhtml?persistentId=doi:10.57745/SINZFK] - **Scores to be saved in designated folder or code should be altered.**)  
 
 ## Repository Structure
 
