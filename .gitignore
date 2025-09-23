@@ -37,20 +37,17 @@ Thumbs.db
 # -----------------------------------------------------------------------------
 # Project data and models (keep repo light)
 # -----------------------------------------------------------------------------
-data/raw/
-data/interim/
-data/processed/
+data/
 exports/
 models/
 
 # Keep empty folder structure with placeholders
-!data/raw/.gitkeep
-!data/interim/.gitkeep
-!data/processed/.gitkeep
+!data/.gitkeep
 !exports/.gitkeep
 !assets/.gitkeep
-!scores/ciciban/.gitkeep
-!scores/slp/.gitkeep
+!assets/README.md
+!scores/.gitkeep
+!scores/**/.gitkeep
 
 # -----------------------------------------------------------------------------
 # Large/binary files (not tracked in Git)
@@ -63,7 +60,10 @@ models/
 *.mp3
 *.mid
 *.midi
+
+# Allow PDFs in assets but ignore elsewhere
 *.pdf
+!assets/**/*.pdf
 
 # -----------------------------------------------------------------------------
 # Logs
