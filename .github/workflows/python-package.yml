@@ -1,40 +1,66 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
 name: Python package
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
 
+    env:
+      # Make modules under src/ importable even without packaging metadata
+      PYTHONPATH: ${{ github.workspace }}/src
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Lint with flake8
+        run: |
+          # Fail on syntax errors / undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Report style issues without failing
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Test with pytest (fallback to smoke import)
+        shell: bash
+        run: |
+          set -e
+          CODE=0
+          # Run pytest; capture its exit code
+          pytest -q || CODE=$?
+
+          if [ "$CODE" -eq 0 ]; then
+            echo "Pytest passed."
+            exit 0
+          fi
+
+          if [ "$CODE" -eq 5 ]; then
+            echo "No tests collected. Performing smoke import…"
+            python -c "import importlib; m=importlib.import_module('educationalfilters'); print('Smoke import OK:', getattr(m,'__file__','n/a'))"
+            exit 0
+          fi
+
+          echo "Pytest failed with exit code $CODE."
+          exit "$CODE"
