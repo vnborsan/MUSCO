@@ -1,0 +1,13 @@
+# Core scientific stack
+numpy>=1.21
+pandas>=1.3
+
+# Plotting
+matplotlib>=3.5
+
+# Music analysis
+music21>=6.1.0
+pysdsl>=0.2.6
+
+# Jupyter notebooks
+jupyter
